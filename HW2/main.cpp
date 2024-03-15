@@ -17,6 +17,8 @@
 #include "mbed.h"
 #include "wifi_helper.h"
 #include "mbed-trace/mbed_trace.h"
+#include "stm32l475e_iot01_accelero.h"
+#define SCALE_MULTIPLIER 1
 
 #if MBED_CONF_APP_USE_TLS_SOCKET
 #include "root_ca_cert.h"
@@ -33,7 +35,7 @@ class SocketDemo {
 #if MBED_CONF_APP_USE_TLS_SOCKET
     static constexpr size_t REMOTE_PORT = 443; // tls port
 #else
-    static constexpr size_t REMOTE_PORT = 80; // standard HTTP port
+    static constexpr size_t REMOTE_PORT = 6531; // standard HTTP port
 #endif // MBED_CONF_APP_USE_TLS_SOCKET
 
 public:
@@ -115,14 +117,38 @@ public:
         }
 
         /* exchange an HTTP request and response */
+        /* ---------------code added--------------*/
+        int16_t pDataXYZ[3] = {0};
+        int count=16;
+        char acc_json[MAX_MESSAGE_RECEIVED_LENGTH];
+        int response;
+        printf("Start sensor init\n");
 
-        if (!send_http_request()) {
-            return;
-        }
 
-        if (!receive_http_response()) {
-            return;
+        BSP_ACCELERO_Init();
+
+        while(count>0) {
+            --count;
+            printf("\nNew loop, LED1 should blink during sensor read\n");
+
+
+            BSP_ACCELERO_AccGetXYZ(pDataXYZ);
+            float x = pDataXYZ[0]*SCALE_MULTIPLIER, y = pDataXYZ[1]*SCALE_MULTIPLIER, 
+                z = pDataXYZ[2]*SCALE_MULTIPLIER;
+            int len = sprintf(acc_json,"{\"x\":%f,\"y\":%f,\"z\":%f,\"s\":%d}",(float)((int)(x*10000))/10000,
+                (float)((int)(y*10000))/10000, (float)((int)(z*10000))/10000, count);
+            printf("\nACCELERO_X = %d\n", pDataXYZ[0]);
+            printf("ACCELERO_Y = %d\n", pDataXYZ[1]);
+            printf("ACCELERO_Z = %d\n", pDataXYZ[2]);
+            response = _socket.send(acc_json,len);
+            if(0>=response){
+                printf("Error sending: %d\n",response);
+            }
+
+            ThisThread::sleep_for(1000);
+
         }
+        /* ---------------------------------------*/
 
         printf("Demo concluded successfully \r\n");
     }
