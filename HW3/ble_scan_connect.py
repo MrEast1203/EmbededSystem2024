@@ -29,8 +29,8 @@ print ("Connecting...")
 dev = Peripheral(addr[num], 'random')
 #
 print ("Services...")
-for svc in dev.services:
-    print (str(svc))
+#for svc in dev.services:
+#    print (str(svc))
 #
 try:
     testService = dev.getServiceByUUID(UUID(0xfff0))
@@ -40,6 +40,16 @@ try:
     ch = dev.getCharacteristics(uuid=UUID(0xfff1))[0]
     if (ch.supportsRead()):
         print (ch.read())
+        
+    ch = dev.getCharacteristics(uuid=UUID(0xfff2))[0]
+    if (ch.supportsRead()):
+        print (ch.read())
+    print("Notify")
+    while True:
+        if dev.waitForNotifications(1.0):
+            print("0xfff2 received notification",ch.read().decode('utf-8'))
+            break
+        print("waiting...")
 #
 finally:
     dev.disconnect()
