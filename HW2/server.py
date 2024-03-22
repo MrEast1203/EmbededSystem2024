@@ -6,22 +6,7 @@ from mpl_toolkits.mplot3d import Axes3D
 HOST = '192.168.0.106' # IP address
 PORT = 5000 # Port to listen on (use ports > 1023)
 
-# Prepare the 3D plot
-fig = plt.figure()
-ax = fig.add_subplot(111, projection='3d')
-plt.ion()  # Turn on interactive mode
 plt.show()
-
-# Define limits for the axes
-ax.set_xlim([-1000, 1000])
-ax.set_ylim([-1000, 1000])
-ax.set_zlim([-1000, 1000])
-
-# Axis labels
-ax.set_xlabel('X')
-ax.set_ylabel('Y')
-ax.set_zlabel('Z')
-
 
 with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
     s.bind((HOST, PORT))
@@ -41,14 +26,11 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
                     choose += 1
                 data = buffer_data[choose] + '}'
             obj = json.loads(data)
+            
             t = obj['s']
-            #plot.scatter(t, obj['x'], c='blue') # x, y, z, gx, gy, gz
-            #plot.xlabel("sample num")
-            #plot.pause(0.0001)
-            # Extract accelerometer data
-            ACCELERO_X = float(obj['x'])
-            ACCELERO_Y = float(obj['y'])
-            ACCELERO_Z = float(obj['z'])
-            ax.scatter(ACCELERO_X, ACCELERO_Y, ACCELERO_Z, c='blue')
-            plt.draw()
+            plt.scatter(t, obj['x'], c='blue') # x, y, z, gx, gy, gz
+            plt.scatter(t, obj['y'], c='red') # x, y, z, gx, gy, gz
+            plt.scatter(t, obj['z'], c='green') # x, y, z, gx, gy, gz
+            plt.xlabel("time")
+            plt.ylabel("acceleration")
             plt.pause(0.0001)
