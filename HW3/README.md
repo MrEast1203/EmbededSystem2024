@@ -10,7 +10,7 @@
 $ python3 -m venv env-ftp
 
 # install the package into it
-$ env-ftp/bin/python -m pip install bluppy
+$ env-ftp/bin/python -m pip install bluepy
 
 # run a script using the Python installation contained within the virtual environment
 $ sudo env-ftp/bin/python -m ble_scan_connect
